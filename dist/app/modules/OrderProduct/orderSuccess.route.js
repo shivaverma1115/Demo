@@ -1,0 +1,35 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const orderSuccess_controller_1 = require("./orderSuccess.controller");
+const userVerify_1 = __importDefault(require("../../../middleware/userVerify"));
+const adminVerify_1 = __importDefault(require("../../../middleware/adminVerify"));
+const paymentSuccess = express_1.default.Router();
+// all Routes
+paymentSuccess.post("/save-payment-info", userVerify_1.default, orderSuccess_controller_1.SavePaymentInfo);
+paymentSuccess.get("/sell-summaries", orderSuccess_controller_1.sellSummary);
+paymentSuccess.get("/best-category-chart", orderSuccess_controller_1.bestCategoryProduct);
+paymentSuccess.get("/clients", orderSuccess_controller_1.getClient);
+paymentSuccess.get("/best-selling-products", orderSuccess_controller_1.bestSellingProduct);
+paymentSuccess.get("/percess-client-info", orderSuccess_controller_1.getpurchaseClientInfo);
+paymentSuccess.get("/orders", orderSuccess_controller_1.orderInfo);
+paymentSuccess.get("/clientInfo", orderSuccess_controller_1.getClientInfo);
+paymentSuccess.get("/search-clients", orderSuccess_controller_1.searchClients);
+paymentSuccess.get("/search-cancel-orders", orderSuccess_controller_1.searchCancelOrders);
+paymentSuccess.get("/search-cancel-orders-pending", orderSuccess_controller_1.searchCancelOrdersPending);
+paymentSuccess.get("/client-order/:id", orderSuccess_controller_1.clientOrders);
+paymentSuccess.get("/track-order/:id", orderSuccess_controller_1.getTrackOrder);
+paymentSuccess.get("/client-order-track/:id", orderSuccess_controller_1.clientOrders);
+paymentSuccess.get("/client-product", orderSuccess_controller_1.searchClientProduct);
+paymentSuccess.get("/client-order-info", orderSuccess_controller_1.clientOrdersInfo);
+paymentSuccess.get("/payment-info", orderSuccess_controller_1.clientPaymentInfo);
+paymentSuccess.get("/cancel-orders", orderSuccess_controller_1.getAllCancelOrders);
+paymentSuccess.get("/cancel-orders-history", orderSuccess_controller_1.getAllCancelOrdersHistory);
+paymentSuccess.get("/single-user-cancel-orders", orderSuccess_controller_1.getSpacificUserCancelData);
+paymentSuccess.put("/update-shipment-status", adminVerify_1.default, orderSuccess_controller_1.updateShipmentStatus);
+paymentSuccess.put("/accept-cancel-order", adminVerify_1.default, orderSuccess_controller_1.acceptCancelOrders);
+paymentSuccess.put("/client-order-cencel", userVerify_1.default, orderSuccess_controller_1.cancelOrders);
+exports.default = paymentSuccess;
