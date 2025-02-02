@@ -4,7 +4,8 @@ const port = process.env.PORT || 5000;
 
 require("dotenv").config();
 // conncet with mongodb atlas
-const mongoUrl = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.qbmtaop.mongodb.net/orgado`;
+// const mongoUrl = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.qbmtaop.mongodb.net/orgado`;
+const mongoUrl = process.env.MONGO_URL!;
 const mongooseOptions: any = {
   useNewUrlParser: true,
   useUnifiedTopology: true,

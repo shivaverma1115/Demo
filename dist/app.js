@@ -13,6 +13,8 @@ const payment_route_1 = __importDefault(require("./app/modules/payment/payment.r
 const orderSuccess_route_1 = __importDefault(require("./app/modules/OrderProduct/orderSuccess.route"));
 const blog_route_1 = __importDefault(require("./app/modules/blog/blog.route"));
 const team_route_1 = __importDefault(require("./app/modules/team/team.route"));
+const aws_route_1 = __importDefault(require("./app/modules/aws/aws.route"));
+const video_route_1 = __importDefault(require("./app/modules/video/video.route"));
 const app = (0, express_1.default)();
 // cors
 app.use((0, cors_1.default)());
@@ -28,4 +30,6 @@ app.use("/payment", payment_route_1.default);
 app.use("/success", orderSuccess_route_1.default);
 app.use("/blog", blog_route_1.default);
 app.use("/team", team_route_1.default);
+app.use("/upload", aws_route_1.default);
+app.use("/video", video_route_1.default);
 exports.default = app;
