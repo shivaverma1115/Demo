@@ -13,7 +13,7 @@ import sampleVideoRoute from "./app/modules/video/video.route";
 const app: Application = express();
 
 // cors
-app.use(cors());
+// app.use(cors());
 // parse data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
