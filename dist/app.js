@@ -17,7 +17,14 @@ const aws_route_1 = __importDefault(require("./app/modules/aws/aws.route"));
 const video_route_1 = __importDefault(require("./app/modules/video/video.route"));
 const app = (0, express_1.default)();
 // cors
-app.use((0, cors_1.default)());
+app.use((0, cors_1.default)({
+    origin: "*",
+    methods: "GET, POST, PUT, DELETE, OPTIONS",
+    allowedHeaders: "Content-Type, Authorization",
+    credentials: true,
+}));
+// Handle preflight OPTIONS requests
+app.options("*", (0, cors_1.default)());
 // parse data
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
