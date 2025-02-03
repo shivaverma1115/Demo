@@ -41,7 +41,7 @@ export function generateSignedUrl(key: string): string {
   const params = {
     Bucket: bucketName,
     Key: key,
-    Expires: 900,
+    Expires: 3600,
   };
   return s3.getSignedUrl('getObject', params);
 }

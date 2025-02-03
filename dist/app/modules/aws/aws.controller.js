@@ -54,7 +54,7 @@ function uploadMedia(req, res) {
             // Generate a signed URL (valid for 15 minutes)
             const signedUrl = (0, aws_services_1.generateSignedUrl)(uploadResult.Key);
             // Schedule file deletion after 15 minutes
-            (0, aws_services_1.scheduleFileDeletion)(uploadResult.Key, 900);
+            (0, aws_services_1.scheduleFileDeletion)(uploadResult.Key, 3600);
             return res.status(200).json({ signedUrl, expiresIn: 900 });
         }
         catch (error) {

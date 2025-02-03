@@ -43,7 +43,7 @@ export async function uploadMedia(req: Request, res: Response) {
         const signedUrl = generateSignedUrl(uploadResult.Key);
 
         // Schedule file deletion after 15 minutes
-        scheduleFileDeletion(uploadResult.Key, 900);
+        scheduleFileDeletion(uploadResult.Key, 3600);
 
         return res.status(200).json({ signedUrl, expiresIn: 900 });
     } catch (error) {
