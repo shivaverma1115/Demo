@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const cors_1 = __importDefault(require("cors"));
 const user_route_1 = __importDefault(require("./app/modules/user/user.route"));
 const setting_route_1 = __importDefault(require("./app/modules/setting/setting.route"));
 const product_route_1 = __importDefault(require("./app/modules/product/product.route"));
@@ -16,7 +17,7 @@ const aws_route_1 = __importDefault(require("./app/modules/aws/aws.route"));
 const video_route_1 = __importDefault(require("./app/modules/video/video.route"));
 const app = (0, express_1.default)();
 // cors
-// app.use(cors());
+app.use((0, cors_1.default)());
 // parse data
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
