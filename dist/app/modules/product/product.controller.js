@@ -12,7 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSubCategoryWizeProducts = exports.updateOfferBannerImage = exports.getFiltredPorductFromAdmin = exports.searchOfferProducts = exports.deleteOfferProduct = exports.allOfferProduct = exports.getOfferProduct = exports.createOffer = exports.Rattings = exports.Review = exports.newArrival = exports.bestSellingProduct = exports.TrendingProduct = exports.OfferProductBanner = exports.OfferProduct = exports.getFiltredPorduct = exports.deleteProduct = exports.deleteSingleImg = exports.updateMultipleImg = exports.updateProductInfo = exports.updateBannerImage = exports.getSinglePorduct = exports.allProduct = exports.createProduct = void 0;
 const product_model_1 = require("./product.model");
 const user_input_model_1 = require("../user-input/user-input.model");
-const orderSuccess_model_1 = require("../OrderProduct/orderSuccess.model");
 const setting_model_1 = require("../setting/setting.model");
 const createProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -299,19 +298,25 @@ const bestSellingProduct = (req, res) => __awaiter(void 0, void 0, void 0, funct
             { $sort: { totalValue: -1 } },
             { $limit: 12 },
         ];
-        const bestSoldProducts = yield orderSuccess_model_1.Order.aggregate(pipeline);
-        const formattedProducts = bestSoldProducts.map((product) => {
-            const productId = product.productIds[0];
-            return {
-                productIds: productId,
-                totalValue: product.totalValue,
-                totalCardSum: product.totalCardSum,
-            };
-        });
-        const productIds = formattedProducts.map((product) => product.productIds);
-        const products = yield product_model_1.Product.find({ _id: { $in: productIds } });
-        const orderedProducts = formattedProducts.map((formattedProduct) => products.find((product) => product._id.toString() === formattedProduct.productIds));
-        res.status(200).send(orderedProducts);
+        // const bestSoldProducts = await Order.aggregate(pipeline);
+        // const formattedProducts: formattedProductsType[] = bestSoldProducts.map(
+        //   (product) => {
+        //     const productId: string = product.productIds[0];
+        //     return {
+        //       productIds: productId,
+        //       totalValue: product.totalValue,
+        //       totalCardSum: product.totalCardSum,
+        //     };
+        //   }
+        // );
+        // const productIds = formattedProducts.map((product) => product.productIds);
+        // const products = await Product.find({ _id: { $in: productIds } });
+        // const orderedProducts = formattedProducts.map((formattedProduct) =>
+        //   products.find(
+        //     (product) => product._id.toString() === formattedProduct.productIds
+        //   )
+        // );
+        res.status(200).send('orderedProducts');
     }
     catch (e) {
         res.status(500).send({ message: "custom error" });

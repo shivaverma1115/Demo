@@ -47,12 +47,27 @@ export function generateSignedUrl(key: string): string {
 }
 
 export async function scheduleFileDeletion(key: string, delayInSeconds: number) {
+
   setTimeout(async () => {
     try {
+      console.log(`🚀 Attempting to delete file: ${key}`);
+
+      // Check if file exists
+      const headParams = { Bucket: bucketName, Key: key };
+      await s3.headObject(headParams).promise();
+
+      // Delete the file
       await s3.deleteObject({ Bucket: bucketName, Key: key }).promise();
-      console.log(`Deleted file: ${key}`);
-    } catch (error) {
-      console.error(`Error deleting file ${key}:`, error);
+      console.log(`✅ Successfully deleted expired file from S3: ${key}`);
+      return {
+        message:`⏳ Scheduling file deletion for ${key} in ${delayInSeconds} seconds...`
+      }
+    } catch (error: any) {
+      if (error.code === 'NotFound') {
+        console.log(`ℹ️ File already deleted or does not exist: ${key}`);
+      } else {
+        console.error(`❌ Error deleting file ${key}:`, error);
+      }
     }
   }, delayInSeconds * 1000);
 }

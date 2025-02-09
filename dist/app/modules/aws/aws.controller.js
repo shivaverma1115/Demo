@@ -12,12 +12,66 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.uploadToS3 = exports.uploadAndCompressPDF = exports.deleteImg = exports.uploadMedia = exports.uploadImg = void 0;
-const fs_1 = __importDefault(require("fs"));
+exports.uploadToS3 = exports.deleteImg = exports.uploadImg = void 0;
+exports.uploadMedia = uploadMedia;
+exports.uploadAndCompressPDF = uploadAndCompressPDF;
 const aws_services_1 = require("./services/aws.services");
 const promises_1 = require("fs/promises");
-// import { PDFDocument } from 'pdf-lib';
-// import path from 'path';
+const fluent_ffmpeg_1 = __importDefault(require("fluent-ffmpeg"));
+const ffmpeg_1 = __importDefault(require("@ffmpeg-installer/ffmpeg"));
+const fs_1 = __importDefault(require("fs"));
+fluent_ffmpeg_1.default.setFfmpegPath(ffmpeg_1.default.path);
+function uploadMedia(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const file = req.file;
+            if (!file)
+                return res.status(400).json({ message: "A media file is required" });
+            // Compressed file path
+            const compressedFilePath = `uploads/compressed-${file.filename}`;
+            // 🔹 Compress video using FFmpeg
+            yield new Promise((resolve, reject) => {
+                (0, fluent_ffmpeg_1.default)(file.path)
+                    .output(compressedFilePath)
+                    .videoCodec("libx264") // Use H.264 codec
+                    .audioCodec("aac")
+                    .size("480x270") // Reduce resolution to 270p (smaller file)
+                    .videoBitrate("300k") // Reduce video bitrate (lower quality)
+                    .audioBitrate("32k") // Lower audio bitrate
+                    .fps(12) // Reduce frame rate to 12 FPS
+                    .outputOptions([
+                    "-preset ultrafast", // Faster compression, lower quality
+                    "-crf 40", // Higher CRF means lower quality (range: 0-51)
+                    "-tune film" // Optimize for general video content
+                ])
+                    .on("end", resolve)
+                    .on("error", reject)
+                    .run();
+            });
+            // 🔹 Upload to AWS S3
+            const fileStream = fs_1.default.createReadStream(compressedFilePath);
+            const uploadParams = {
+                Bucket: process.env.AWS_BUCKET_NAME,
+                Key: `compressed/${file.filename}`,
+                Body: fileStream,
+                ContentType: "video/mp4",
+            };
+            const uploadResult = yield aws_services_1.s3.upload(uploadParams).promise();
+            // ✅ Delete local files after upload
+            fs_1.default.unlinkSync(file.path);
+            fs_1.default.unlinkSync(compressedFilePath);
+            // Generate a signed URL (valid for 1 hour)
+            const signedUrl = (0, aws_services_1.generateSignedUrl)(uploadResult.Key);
+            // Schedule file deletion after 1 hour
+            (0, aws_services_1.scheduleFileDeletion)(uploadResult.Key, 3600);
+            return res.status(200).json({ signedUrl, expiresIn: 3600 });
+        }
+        catch (error) {
+            console.error("Upload error:", error);
+            return res.status(500).json({ message: "Internal server error" });
+        }
+    });
+}
 // add images 
 const uploadImg = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -38,32 +92,28 @@ const uploadImg = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.uploadImg = uploadImg;
-function uploadMedia(req, res) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const file = req.file;
-            if (!file) {
-                return res.status(400).json({ message: "A media file is required" });
-            }
-            if (file.size > 50000000) { // 50MB size limit for videos
-                return res.status(400).json({ message: "Media should be less than 50MB" });
-            }
-            const uploadResult = yield (0, aws_services_1.uploadFile)(file);
-            // Delete Local File
-            yield (0, promises_1.unlink)(file.path);
-            // Generate a signed URL (valid for 15 minutes)
-            const signedUrl = (0, aws_services_1.generateSignedUrl)(uploadResult.Key);
-            // Schedule file deletion after 15 minutes
-            (0, aws_services_1.scheduleFileDeletion)(uploadResult.Key, 3600);
-            return res.status(200).json({ signedUrl, expiresIn: 900 });
-        }
-        catch (error) {
-            console.error("Upload error:", error);
-            return res.status(500).json({ message: "Internal server error" });
-        }
-    });
-}
-exports.uploadMedia = uploadMedia;
+// export async function uploadMedia(req: Request, res: Response) {
+//     try {
+//         const file: any = req.file;
+//         if (!file) {
+//             return res.status(400).json({ message: "A media file is required" });
+//         }
+//         if (file.size > 50000000) { // 50MB size limit for videos
+//             return res.status(400).json({ message: "Media should be less than 50MB" });
+//         }
+//         const uploadResult = await uploadFile(file);
+//         // Delete Local File
+//         await unlink(file.path);
+//         // Generate a signed URL (valid for 15 minutes)
+//         const signedUrl = generateSignedUrl(uploadResult.Key);
+//         // Schedule file deletion after 15 minutes
+//         scheduleFileDeletion(uploadResult.Key, 3600);
+//         return res.status(200).json({ signedUrl, expiresIn: 900 });
+//     } catch (error) {
+//         console.error("Upload error:", error);
+//         return res.status(500).json({ message: "Internal server error" + error });
+//     }
+// }
 const deleteImg = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const isKey = req.body.Key;
@@ -122,7 +172,6 @@ function uploadAndCompressPDF(req, res) {
         }
     });
 }
-exports.uploadAndCompressPDF = uploadAndCompressPDF;
 const uploadToS3 = (filePath, key) => {
     const fileContent = fs_1.default.readFileSync(filePath);
     const params = {

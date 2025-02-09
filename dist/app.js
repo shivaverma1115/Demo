@@ -6,19 +6,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const user_route_1 = __importDefault(require("./app/modules/user/user.route"));
-const setting_route_1 = __importDefault(require("./app/modules/setting/setting.route"));
-const product_route_1 = __importDefault(require("./app/modules/product/product.route"));
-const user_input_route_1 = __importDefault(require("./app/modules/user-input/user-input.route"));
-const payment_route_1 = __importDefault(require("./app/modules/payment/payment.route"));
-const orderSuccess_route_1 = __importDefault(require("./app/modules/OrderProduct/orderSuccess.route"));
-const blog_route_1 = __importDefault(require("./app/modules/blog/blog.route"));
-const team_route_1 = __importDefault(require("./app/modules/team/team.route"));
 const aws_route_1 = __importDefault(require("./app/modules/aws/aws.route"));
 const video_route_1 = __importDefault(require("./app/modules/video/video.route"));
 const app = (0, express_1.default)();
 // cors
 app.use((0, cors_1.default)({
-    origin: "*",
+    origin: "*", // Or specify your frontend: ["http://localhost:3000", "https://your-frontend.com"]
     methods: "GET, POST, PUT, DELETE, OPTIONS",
     allowedHeaders: "Content-Type, Authorization",
     credentials: true,
@@ -30,13 +23,13 @@ app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 // routes
 app.use("/user", user_route_1.default);
-app.use("/setting", setting_route_1.default);
-app.use("/product", product_route_1.default);
-app.use("/user-input", user_input_route_1.default);
-app.use("/payment", payment_route_1.default);
-app.use("/success", orderSuccess_route_1.default);
-app.use("/blog", blog_route_1.default);
-app.use("/team", team_route_1.default);
+// app.use("/setting", SettingsRouter);
+// app.use("/product", productRoute);
+// app.use("/user-input", userInputRoute);
+// app.use("/payment", PaymentRoute);
+// app.use("/success", paymentSuccess);
+// app.use("/blog", blogRoute);
+// app.use("/team", teamRoute);
 app.use("/upload", aws_route_1.default);
 app.use("/video", video_route_1.default);
 exports.default = app;

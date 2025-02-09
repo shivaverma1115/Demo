@@ -464,7 +464,7 @@ const updateShipmentStatus = (req, res) => __awaiter(void 0, void 0, void 0, fun
 exports.updateShipmentStatus = updateShipmentStatus;
 // cencel order
 const cancelOrders = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _b, _c;
+    var _a, _b;
     try {
         const cancelData = req.body;
         const { id, buyerEmail, EmailAddress, orderProduct, date, Phone, paymentId, orderId, } = cancelData;
@@ -486,11 +486,11 @@ const cancelOrders = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             const saveData = yield cancelOrder.save();
             if (saveData) {
                 const result = yield orderSuccess_model_1.Order.updateOne({ _id: ClientOrder === null || ClientOrder === void 0 ? void 0 : ClientOrder.id }, {
-                    $pull: { orderProducts: { _id: (_b = cancelData === null || cancelData === void 0 ? void 0 : cancelData.orderProduct) === null || _b === void 0 ? void 0 : _b._id } },
+                    $pull: { orderProducts: { _id: (_a = cancelData === null || cancelData === void 0 ? void 0 : cancelData.orderProduct) === null || _a === void 0 ? void 0 : _a._id } },
                 });
                 if (result.modifiedCount === 1) {
                     const isEmpthy = yield orderSuccess_model_1.Order.findOne({ _id: ClientOrder === null || ClientOrder === void 0 ? void 0 : ClientOrder.id });
-                    if (((_c = isEmpthy === null || isEmpthy === void 0 ? void 0 : isEmpthy.orderProducts) === null || _c === void 0 ? void 0 : _c.length) === 0) {
+                    if (((_b = isEmpthy === null || isEmpthy === void 0 ? void 0 : isEmpthy.orderProducts) === null || _b === void 0 ? void 0 : _b.length) === 0) {
                         const result = yield orderSuccess_model_1.Order.updateOne({ _id: ClientOrder === null || ClientOrder === void 0 ? void 0 : ClientOrder.id }, {
                             $set: { shipmentStatus: "order cancelled" },
                         });
@@ -653,7 +653,7 @@ const getSpacificUserCancelData = (req, res) => __awaiter(void 0, void 0, void 0
 });
 exports.getSpacificUserCancelData = getSpacificUserCancelData;
 const getTrackOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _d;
+    var _a;
     try {
         const orderId = req.params.id;
         // Validate id format (example: check if it's a valid ObjectId for MongoDB)
@@ -661,7 +661,7 @@ const getTrackOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             return res.status(400).send({ error: "Invalid ID format" });
         }
         const products = yield orderSuccess_model_1.Order.findOne({ orderId: orderId });
-        if (!products || ((_d = products === null || products === void 0 ? void 0 : products.orderProducts) === null || _d === void 0 ? void 0 : _d.length) === 0) {
+        if (!products || ((_a = products === null || products === void 0 ? void 0 : products.orderProducts) === null || _a === void 0 ? void 0 : _a.length) === 0) {
             res.send({ message: "No products found for the given ID" });
         }
         else {

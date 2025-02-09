@@ -12,7 +12,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteFile = exports.scheduleFileDeletion = exports.generateSignedUrl = exports.uploadFile = exports.s3 = exports.secretAccessKey = exports.accessKeyId = exports.region = exports.bucketName = void 0;
+exports.s3 = exports.secretAccessKey = exports.accessKeyId = exports.region = exports.bucketName = void 0;
+exports.uploadFile = uploadFile;
+exports.generateSignedUrl = generateSignedUrl;
+exports.scheduleFileDeletion = scheduleFileDeletion;
+exports.deleteFile = deleteFile;
 const fs_1 = __importDefault(require("fs")); // Import for asynchronous file reading
 const aws_sdk_1 = require("aws-sdk");
 // Load environment variables with type safety
@@ -49,7 +53,6 @@ function uploadFile(file) {
         }
     });
 }
-exports.uploadFile = uploadFile;
 function generateSignedUrl(key) {
     const params = {
         Bucket: exports.bucketName,
@@ -58,21 +61,32 @@ function generateSignedUrl(key) {
     };
     return exports.s3.getSignedUrl('getObject', params);
 }
-exports.generateSignedUrl = generateSignedUrl;
 function scheduleFileDeletion(key, delayInSeconds) {
     return __awaiter(this, void 0, void 0, function* () {
         setTimeout(() => __awaiter(this, void 0, void 0, function* () {
             try {
+                console.log(`🚀 Attempting to delete file: ${key}`);
+                // Check if file exists
+                const headParams = { Bucket: exports.bucketName, Key: key };
+                yield exports.s3.headObject(headParams).promise();
+                // Delete the file
                 yield exports.s3.deleteObject({ Bucket: exports.bucketName, Key: key }).promise();
-                console.log(`Deleted file: ${key}`);
+                console.log(`✅ Successfully deleted expired file from S3: ${key}`);
+                return {
+                    message: `⏳ Scheduling file deletion for ${key} in ${delayInSeconds} seconds...`
+                };
             }
             catch (error) {
-                console.error(`Error deleting file ${key}:`, error);
+                if (error.code === 'NotFound') {
+                    console.log(`ℹ️ File already deleted or does not exist: ${key}`);
+                }
+                else {
+                    console.error(`❌ Error deleting file ${key}:`, error);
+                }
             }
         }), delayInSeconds * 1000);
     });
 }
-exports.scheduleFileDeletion = scheduleFileDeletion;
 function deleteFile(Key) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -89,4 +103,3 @@ function deleteFile(Key) {
         }
     });
 }
-exports.deleteFile = deleteFile;

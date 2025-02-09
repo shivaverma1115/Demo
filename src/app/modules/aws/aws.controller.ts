@@ -1,9 +1,70 @@
-import fs from 'fs';
+
 import { Request, Response } from "express";
 import { bucketName, deleteFile, uploadFile, s3, generateSignedUrl, scheduleFileDeletion } from './services/aws.services'
 import { unlink } from 'fs/promises';
-// import { PDFDocument } from 'pdf-lib';
-// import path from 'path';
+import ffmpeg from "fluent-ffmpeg";
+import ffmpegInstaller from "@ffmpeg-installer/ffmpeg";
+import fs from "fs";
+import path from "path";
+
+ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+
+
+export async function uploadMedia(req: Request, res: Response) {
+    try {
+        const file: any = req.file;
+        if (!file) return res.status(400).json({ message: "A media file is required" });
+
+        // Compressed file path
+        const compressedFilePath = `uploads/compressed-${file.filename}`;
+
+        // 🔹 Compress video using FFmpeg
+        await new Promise((resolve, reject) => {
+            ffmpeg(file.path)
+                .output(compressedFilePath)
+                .videoCodec("libx264") // Use H.264 codec
+                .audioCodec("aac")
+                .size("480x270") // Reduce resolution to 270p (smaller file)
+                .videoBitrate("300k") // Reduce video bitrate (lower quality)
+                .audioBitrate("32k") // Lower audio bitrate
+                .fps(12) // Reduce frame rate to 12 FPS
+                .outputOptions([
+                    "-preset ultrafast", // Faster compression, lower quality
+                    "-crf 40", // Higher CRF means lower quality (range: 0-51)
+                    "-tune film" // Optimize for general video content
+                ])
+                .on("end", resolve)
+                .on("error", reject)
+                .run();
+        });
+
+        // 🔹 Upload to AWS S3
+        const fileStream = fs.createReadStream(compressedFilePath);
+        const uploadParams = {
+            Bucket: process.env.AWS_BUCKET_NAME!,
+            Key: `compressed/${file.filename}`,
+            Body: fileStream,
+            ContentType: "video/mp4",
+        };
+
+        const uploadResult = await s3.upload(uploadParams).promise();
+
+        // ✅ Delete local files after upload
+        fs.unlinkSync(file.path);
+        fs.unlinkSync(compressedFilePath);
+
+        // Generate a signed URL (valid for 1 hour)
+        const signedUrl = generateSignedUrl(uploadResult.Key);
+
+        // Schedule file deletion after 1 hour
+        scheduleFileDeletion(uploadResult.Key, 3600);
+
+        return res.status(200).json({ signedUrl, expiresIn: 3600 });
+    } catch (error) {
+        console.error("Upload error:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+}
 
 // add images 
 export const uploadImg = async (req: Request, res: Response) => {
@@ -24,33 +85,34 @@ export const uploadImg = async (req: Request, res: Response) => {
     }
 };
 
-export async function uploadMedia(req: Request, res: Response) {
-    try {
-        const file: any = req.file;
-        if (!file) {
-            return res.status(400).json({ message: "A media file is required" });
-        }
-        if (file.size > 50000000) { // 50MB size limit for videos
-            return res.status(400).json({ message: "Media should be less than 50MB" });
-        }
 
-        const uploadResult = await uploadFile(file);
+// export async function uploadMedia(req: Request, res: Response) {
+//     try {
+//         const file: any = req.file;
+//         if (!file) {
+//             return res.status(400).json({ message: "A media file is required" });
+//         }
+//         if (file.size > 50000000) { // 50MB size limit for videos
+//             return res.status(400).json({ message: "Media should be less than 50MB" });
+//         }
 
-        // Delete Local File
-        await unlink(file.path);
+//         const uploadResult = await uploadFile(file);
 
-        // Generate a signed URL (valid for 15 minutes)
-        const signedUrl = generateSignedUrl(uploadResult.Key);
+//         // Delete Local File
+//         await unlink(file.path);
 
-        // Schedule file deletion after 15 minutes
-        scheduleFileDeletion(uploadResult.Key, 3600);
+//         // Generate a signed URL (valid for 15 minutes)
+//         const signedUrl = generateSignedUrl(uploadResult.Key);
 
-        return res.status(200).json({ signedUrl, expiresIn: 900 });
-    } catch (error) {
-        console.error("Upload error:", error);
-        return res.status(500).json({ message: "Internal server error" });
-    }
-}
+//         // Schedule file deletion after 15 minutes
+//         scheduleFileDeletion(uploadResult.Key, 3600);
+
+//         return res.status(200).json({ signedUrl, expiresIn: 900 });
+//     } catch (error) {
+//         console.error("Upload error:", error);
+//         return res.status(500).json({ message: "Internal server error" + error });
+//     }
+// }
 
 
 export const deleteImg = async (req: Request, res: Response) => {
