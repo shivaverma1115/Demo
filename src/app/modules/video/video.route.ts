@@ -7,7 +7,7 @@ import {
 const sampleVideoRoute = express.Router();
 
 // all Routes
-sampleVideoRoute.post("/", getSampleVideo);
+sampleVideoRoute.get("/", getSampleVideo);
 sampleVideoRoute.get("/:id", getWeddingInfo);
 sampleVideoRoute.post("/create-video-sample", createVideoSample);
 

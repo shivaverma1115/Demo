@@ -22,7 +22,7 @@ export const createVideoSample = async (req: Request, res: Response) => {
 
 export const getSampleVideo = async (req: Request, res: Response) => {
   try {
-    const demoVideo = await Video.find().select("_id title isExpired");
+    const demoVideo = await Video.find().sort({ _id: -1 }).select("_id title isExpired").limit(10);
     return res.status(200).send({
       message: 'successfuly fetch',
       demoVideo
@@ -41,7 +41,7 @@ export const getWeddingInfo = async (req: Request, res: Response) => {
         message: 'Video not found'
       });
     }
-    
+
     // Check if the video is older than 1 hour
     const currentTime = new Date().getTime();
     const videoCreatedAt = demoVideo.createdAt.getTime();
