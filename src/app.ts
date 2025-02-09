@@ -5,7 +5,7 @@ import SettingsRouter from "./app/modules/setting/setting.route";
 import productRoute from "./app/modules/product/product.route";
 import userInputRoute from "./app/modules/user-input/user-input.route";
 import PaymentRoute from "./app/modules/payment/payment.route";
-import paymentSuccess from "./app/modules/OrderProduct/orderSuccess.route";
+// import paymentSuccess from "./app/modules/OrderProduct/orderSuccess.route";
 import blogRoute from "./app/modules/blog/blog.route";
 import teamRoute from "./app/modules/team/team.route";
 import awsRouter from "./app/modules/aws/aws.route";
@@ -31,13 +31,13 @@ app.use(express.urlencoded({ extended: true }));
 
 // routes
 app.use("/user", UserRouter);
-app.use("/setting", SettingsRouter);
-app.use("/product", productRoute);
-app.use("/user-input", userInputRoute);
-app.use("/payment", PaymentRoute);
-app.use("/success", paymentSuccess);
-app.use("/blog", blogRoute);
-app.use("/team", teamRoute);
+// app.use("/setting", SettingsRouter);
+// app.use("/product", productRoute);
+// app.use("/user-input", userInputRoute);
+// app.use("/payment", PaymentRoute);
+// app.use("/success", paymentSuccess);
+// app.use("/blog", blogRoute);
+// app.use("/team", teamRoute);
 
 app.use("/upload", awsRouter);
 app.use("/video", sampleVideoRoute);

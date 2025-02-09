@@ -17,7 +17,7 @@ const userSchema = new mongoose_1.Schema({
     phone: { type: String, required: true, trim: true },
     email: { type: String, required: true, trim: true },
     location: { type: String, required: true, trim: true },
-    skills: [skillSchema],
+    skills: [skillSchema], // skills is an array of Skill objects
     facebook: { type: String, trim: true },
     twitter: { type: String, trim: true },
     instagram: { type: String, trim: true },

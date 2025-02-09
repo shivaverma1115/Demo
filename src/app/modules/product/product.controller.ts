@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { OffProduct, Product } from "./product.model";
 import { Reviews } from "../user-input/user-input.model";
-import { Order } from "../OrderProduct/orderSuccess.model";
+// import { Order } from "../OrderProduct/orderSuccess.model";
 import { formattedProductsType } from "./product.interface";
 import { UserReviewType } from "../user-input/user-input.interface";
 import { SubCategory } from "../setting/setting.model";
@@ -316,27 +316,27 @@ export const bestSellingProduct = async (req: Request, res: Response) => {
       { $sort: { totalValue: -1 } },
       { $limit: 12 },
     ];
-    const bestSoldProducts = await Order.aggregate(pipeline);
+    // const bestSoldProducts = await Order.aggregate(pipeline);
 
-    const formattedProducts: formattedProductsType[] = bestSoldProducts.map(
-      (product) => {
-        const productId: string = product.productIds[0];
-        return {
-          productIds: productId,
-          totalValue: product.totalValue,
-          totalCardSum: product.totalCardSum,
-        };
-      }
-    );
+    // const formattedProducts: formattedProductsType[] = bestSoldProducts.map(
+    //   (product) => {
+    //     const productId: string = product.productIds[0];
+    //     return {
+    //       productIds: productId,
+    //       totalValue: product.totalValue,
+    //       totalCardSum: product.totalCardSum,
+    //     };
+    //   }
+    // );
 
-    const productIds = formattedProducts.map((product) => product.productIds);
-    const products = await Product.find({ _id: { $in: productIds } });
-    const orderedProducts = formattedProducts.map((formattedProduct) =>
-      products.find(
-        (product) => product._id.toString() === formattedProduct.productIds
-      )
-    );
-    res.status(200).send(orderedProducts);
+    // const productIds = formattedProducts.map((product) => product.productIds);
+    // const products = await Product.find({ _id: { $in: productIds } });
+    // const orderedProducts = formattedProducts.map((formattedProduct) =>
+    //   products.find(
+    //     (product) => product._id.toString() === formattedProduct.productIds
+    //   )
+    // );
+    res.status(200).send('orderedProducts');
   } catch (e) {
     res.status(500).send({ message: "custom error" });
   }

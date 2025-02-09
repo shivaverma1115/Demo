@@ -31,7 +31,7 @@ const createVideoSample = (req, res) => __awaiter(void 0, void 0, void 0, functi
 exports.createVideoSample = createVideoSample;
 const getSampleVideo = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const demoVideo = yield video_model_1.Video.find().select("_id title isExpired");
+        const demoVideo = yield video_model_1.Video.find().sort({ _id: -1 }).select("_id title isExpired").limit(10);
         return res.status(200).send({
             message: 'successfuly fetch',
             demoVideo
