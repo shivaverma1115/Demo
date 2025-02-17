@@ -9,20 +9,14 @@ const user_route_1 = __importDefault(require("./app/modules/user/user.route"));
 const aws_route_1 = __importDefault(require("./app/modules/aws/aws.route"));
 const video_route_1 = __importDefault(require("./app/modules/video/video.route"));
 const app = (0, express_1.default)();
-// CORS configuration
-const corsOptions = {
-    origin: 'https://admin.gccreator.in', // Allow only this origin
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify allowed methods
-    allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
-    credentials: true, // Allow credentials (cookies, etc.)
-};
-app.use((0, cors_1.default)(corsOptions)); // Apply CORS with the defined options
+// cors
+app.use((0, cors_1.default)());
 // Handle preflight OPTIONS requests
-app.options("*", (0, cors_1.default)(corsOptions));
-// Parse data
+app.options("*", (0, cors_1.default)());
+// parse data
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
-// Routes
+// routes
 app.use("/user", user_route_1.default);
 app.use("/upload", aws_route_1.default);
 app.use("/video", video_route_1.default);
