@@ -3,21 +3,27 @@ import cors from "cors";
 import UserRouter from "./app/modules/user/user.route";
 import awsRouter from "./app/modules/aws/aws.route";
 import sampleVideoRoute from "./app/modules/video/video.route";
+
 const app: Application = express();
 
-// cors
-app.use(
-    cors()
-);
+// CORS configuration
+const corsOptions = {
+    origin: 'https://admin.gccreator.in', // Allow only this origin
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify allowed methods
+    allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
+    credentials: true, // Allow credentials (cookies, etc.)
+};
+
+app.use(cors(corsOptions)); // Apply CORS with the defined options
 
 // Handle preflight OPTIONS requests
-app.options("*", cors());
+app.options("*", cors(corsOptions));
 
-// parse data
+// Parse data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// routes
+// Routes
 app.use("/user", UserRouter);
 app.use("/upload", awsRouter);
 app.use("/video", sampleVideoRoute);
